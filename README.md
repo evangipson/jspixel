@@ -11,9 +11,7 @@ jspixel is a particle engine written in JavaScript.
 | [License](#license) |
 
 ## Getting Started
-If you want a local copy of jspixel, just fork the repository, and set this up in a folder somewhere on your computer. After that, run the gulpfile.js to build the JavaScript and the SCSS, then you can use the index.html to view the web page.
-
-You will have to create a new Firebase database and upload new configuration settings in jspixel/src/js/db.js if you'd like to detach from the main database.
+If you want a local copy of jspixel, just fork the repository, and set this up in a folder somewhere on your computer. After that, just load up index.html in any browser, but I use Google Chrome.
 
 ## Built With
 * JavaScript
@@ -29,7 +27,7 @@ Have a look at the [issues with jspixel](https://github.com/evangipson/jspixel/i
 I will run all new javascript through [JSHint](http://jshint.com/) before merging into master.
 
 ## Versioning
-Chessy is maintained using a 3-digit versioning system, represented by:
+jspixel is maintained using a 3-digit versioning system, represented by:
 ```
 [Major Version].[Minor Version].[Update]
 ```
