@@ -196,7 +196,7 @@ const STARSYSTEM = (function() {
     /* Draws each particle. */
     const draw = function() {
         for (var particle in particleList) {
-            if (particle !== undefined) {
+            if (particleList[particle] !== null)  {
                 // Position our particle
                 position(particleList[particle]);
                 // Set the color of our particle
