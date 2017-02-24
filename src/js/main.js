@@ -35,7 +35,7 @@ const STARSYSTEM = (function() {
       age: 0,
       /* The star will "start" dying at a random
        * time between 2 and 5 seconds. */
-      death: getRandomArbitrary(15, 65) * 100, // Roghly in seconds
+      death: getRandomArbitrary(15, 165) * 100, // Roghly in seconds
       maxSize: getRandomArbitrary(40, 80)
     };
   };
