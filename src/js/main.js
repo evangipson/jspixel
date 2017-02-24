@@ -39,31 +39,28 @@ const STARSYSTEM = (function() {
         particleSpawnPoint.y = event.clientY;
     };
 
-    /* Will create a particle if max number of allowed
-     * particles isn't surpassed. Takes optional
+    /* Will create a particle. Takes optional
      * parameters to define particles.
      * Will take in speed, color, direction (as a
      * vector), size (as {x, y}), and point (as {x, y}). */
     const createParticle = function(color, direction, size, point) {
-        if (particleList.length < numberOfParticles) {
-            return {
-                color: color,
-                direction: direction,
-                size: size,
-                point: point,
-                age: 0,
-                /* The star will "start" dying at a random
-                 * time between 2 and 5 seconds. */
-                death: getRandomArbitrary(15, 165) * 100, // Roghly in seconds
-                maxSize: getRandomArbitrary(40, 80)
-            };
-        }
+        return {
+            color: color,
+            direction: direction,
+            size: size,
+            point: point,
+            age: 0,
+            /* The star will "start" dying at a random
+              * time between 2 and 5 seconds. */
+            death: getRandomArbitrary(1, 2) * 100, // Roghly in seconds
+            maxSize: getRandomArbitrary(40, 80)
+        };
     };
 
     /* Will retrieve an appropriate hex value. */
     const getRandomHexValue = function() {
-        return '#' + Math.floor(Math.random() * 16777215).toString(16);
-        /* const colors = [
+        //return '#' + Math.floor(Math.random() * 16777215).toString(16);
+        const colors = [
           "#4b45da",
           "#ea1d76",
           "#290088",
@@ -72,7 +69,7 @@ const STARSYSTEM = (function() {
           "#00afaa",
           "#26CAD3"
         ];
-        return colors[Math.floor(Math.random()*colors.length)]; */
+        return colors[Math.floor(Math.random()*colors.length)];
     };
 
     /* Create a particle and put it
@@ -92,8 +89,8 @@ const STARSYSTEM = (function() {
          * for the particle to be a "super" particle. */
         const isSuperParticle = Math.random() > 0.03;
         let size = {
-            x: isSuperParticle ? getRandomArbitrary(2, 4) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2),
-            y: isSuperParticle ? getRandomArbitrary(2, 4) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2)
+            x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2),
+            y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2)
         };
         // Super small chance we have a protostar
         if (Math.random() > 0.95 && size.x > 10 && size.y > 10) {
@@ -120,7 +117,7 @@ const STARSYSTEM = (function() {
     const queue = function() {
         /* Add a particle if the user has moved
          * their mouse */
-        if (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) {
+        if ((particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) && particleList.length < numberOfParticles) {
             particleList.push(createDefaultParticle());
         }
         window.requestAnimationFrame(tick);
@@ -133,18 +130,16 @@ const STARSYSTEM = (function() {
         const particleIndex = particleList.indexOf(particle);
         // So I can remove it, because it's dead!
         particleList.splice(particleIndex, 1);
-        // Create a new one!
-        particleList.push(createDefaultParticle());
     };
 
     /* Will degrade the speed of the direction for
      * a particle. */
     const degradeSpeed = function(particle) {
         // Adjust the vector?
-        if (Math.random() > 0.95) {
+        if (Math.random() > 0.975) {
             particle.direction.x = particle.direction.x - (particle.direction.x * 0.005);
         }
-        if (Math.random() > 0.95) {
+        if (Math.random() > 0.975) {
             particle.direction.y = particle.direction.y - (particle.direction.y * 0.005);
         }
     };
@@ -184,7 +179,7 @@ const STARSYSTEM = (function() {
             }
             // Enter death state
             if (particle.age > particle.death && particle.size < particle.maxSize) {
-                particle.color = "#eee";
+                particle.color = "#111";
                 particle.size = particle.size * 1.005;
             }
         } else {
@@ -196,7 +191,7 @@ const STARSYSTEM = (function() {
     /* Draws each particle. */
     const draw = function() {
         for (var particle in particleList) {
-            if (particleList[particle] !== null)  {
+            if (typeof particleList[particle] !== 'undefined' && typeof particleList[particle].point !== 'undefined')  {
                 // Position our particle
                 position(particleList[particle]);
                 // Set the color of our particle
