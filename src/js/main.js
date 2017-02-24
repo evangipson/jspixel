@@ -141,10 +141,10 @@ const STARSYSTEM = (function() {
      * a particle. */
     const degradeSpeed = function(particle) {
         // Adjust the vector?
-        if (Math.random() > 0.8) {
+        if (Math.random() > 0.95) {
             particle.direction.x = particle.direction.x - (particle.direction.x * 0.005);
         }
-        if (Math.random() > 0.8) {
+        if (Math.random() > 0.95) {
             particle.direction.y = particle.direction.y - (particle.direction.y * 0.005);
         }
     };
@@ -166,7 +166,7 @@ const STARSYSTEM = (function() {
             particle.direction.y = particle.direction.y * -1;
         }
         // Degrade our particle speed.
-        //degradeSpeed(particle);
+        degradeSpeed(particle);
     };
 
     /* Will age a particle. The high level logic is that
