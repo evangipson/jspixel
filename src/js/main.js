@@ -9,7 +9,7 @@ const STARSYSTEM = (function() {
     theCanvas.height = window.innerHeight;
     // The global list of particles that are alive
     let particleList = [];
-    const numberOfParticles = 5000;
+    const numberOfParticles = 1500;
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
      * null to ensure particles won't spawn until user
