@@ -72,8 +72,8 @@ const STARSYSTEM = (function() {
         return colors[Math.floor(Math.random()*colors.length)];
     };
 
-    /* Create a particle and put it
-     * into the array */
+    /* Create a particle in the default position
+     * and put it into the array */
     const createDefaultParticle = function() {
         // Randomize color
         const color = getRandomHexValue();
@@ -98,7 +98,37 @@ const STARSYSTEM = (function() {
             size.y *= getRandomArbitrary(5, 10);
         }
         // Randomize point
-        var point = {
+        const point = {
+            x: theCanvas.width * Math.random(),
+            y: theCanvas.height * Math.random()
+        };
+        //const point = {x: theCanvas.width * Math.random(), y: theCanvas.height * Math.random()};
+        return createParticle(color, vector, size, point);
+    };
+
+    /* Will follow the mouse and create particles
+     * based off coordinates.
+     * NOTE: Duplicates lots of createDefaultParticle()
+     * could probably use a solution there...
+     * NOTE: No superstars!! */
+    const createMouseDrivenParticle = function() {
+        // Randomize color
+        const color = getRandomHexValue();
+        // Randomize a vector
+        const tempX = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
+        const tempY = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
+        // Build our vector to send to createParticle
+        const vector = {
+            x: tempX,
+            y: tempY
+        };
+        // Randomize size
+        let size = {
+            x: getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0),
+            y: getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0)
+        };
+        // Randomize point
+        const point = {
             x: particleSpawnPoint.x,
             y: particleSpawnPoint.y
         };
@@ -117,7 +147,14 @@ const STARSYSTEM = (function() {
     const queue = function() {
         /* Add a particle if the user has moved
          * their mouse */
-        if ((particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) && particleList.length < numberOfParticles) {
+        if (particleList.length < numberOfParticles) {
+            // These two functions could probably be.
+            // the same function somehow. Arguments?
+            // but then that's createParticle...
+            // Rest Parameters?
+            if (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) {
+                particleList.push(createMouseDrivenParticle());
+            }
             particleList.push(createDefaultParticle());
         }
         window.requestAnimationFrame(tick);
