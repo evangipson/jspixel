@@ -10,6 +10,7 @@ const STARSYSTEM = (function() {
     // The global list of particles that are alive
     let particleList = [];
     const numberOfParticles = 1500;
+    const growRate = 1.003;
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
      * null to ensure particles won't spawn until user
@@ -52,7 +53,7 @@ const STARSYSTEM = (function() {
             age: 0,
             /* The star will "start" dying at a random
               * time between 2 and 5 seconds. */
-            death: getRandomArbitrary(1, 2) * 100, // Roghly in seconds
+            death: getRandomArbitrary(12, 128) * 100, // Roghly in seconds
             maxSize: getRandomArbitrary(40, 80)
         };
     };
@@ -63,7 +64,7 @@ const STARSYSTEM = (function() {
         const colors = [
           "#4b45da",
           "#ea1d76",
-          "#290088",
+          //"#290088",
           "#00c18b",
           "#ff9e16",
           "#00afaa",
@@ -172,12 +173,18 @@ const STARSYSTEM = (function() {
     /* Will degrade the speed of the direction for
      * a particle. */
     const degradeSpeed = function(particle) {
-        // Adjust the vector?
+        /* Small chance to "slow down" and
+         * zoom in. */
         if (Math.random() > 0.975) {
             particle.direction.x = particle.direction.x - (particle.direction.x * 0.005);
-        }
-        if (Math.random() > 0.975) {
             particle.direction.y = particle.direction.y - (particle.direction.y * 0.005);
+            // Limit growth to maxSize property
+            if(particle.size.x < particle.maxSize) {
+              particle.size.x *= growRate;
+            }
+            if(particle.size.y < particle.maxSize) {
+              particle.size.y *= growRate;
+            }
         }
     };
 
@@ -215,9 +222,14 @@ const STARSYSTEM = (function() {
                 particle.age++;
             }
             // Enter death state
-            if (particle.age > particle.death && particle.size < particle.maxSize) {
+            if (particle.age > particle.death) {
                 particle.color = "#111";
-                particle.size = particle.size * 1.005;
+                if(particle.size.x < particle.maxSize) {
+                  particle.size.x *= growRate;
+                }
+                if(particle.size.y < particle.maxSize) {
+                  particle.size.y *= growRate;
+                }
             }
         } else {
             // Kill the particle
@@ -228,7 +240,7 @@ const STARSYSTEM = (function() {
     /* Draws each particle. */
     const draw = function() {
         for (var particle in particleList) {
-            if (typeof particleList[particle] !== 'undefined' && typeof particleList[particle].point !== 'undefined')  {
+            if (typeof particleList[particle] !== 'undefined')  {
                 // Position our particle
                 position(particleList[particle]);
                 // Set the color of our particle
@@ -257,6 +269,8 @@ const STARSYSTEM = (function() {
         document.onmousemove = function(e) {
             updateParticleStartPoint(e);
         };
+        // Set the blending operation.
+        theCanvas.globalCompositeOperation = "multiply";
         // After we initialize, call the first tick.
         tick();
     };
