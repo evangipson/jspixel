@@ -9,8 +9,9 @@ const STARSYSTEM = (function() {
     theCanvas.height = window.innerHeight;
     // The global list of particles that are alive
     let particleList = [];
-    const numberOfParticles = 1500;
+    const numberOfParticles = 1000;
     const growRate = 1.003;
+    const largeParticleThreshold = 8;
     
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
@@ -64,48 +65,44 @@ const STARSYSTEM = (function() {
     /* Will create a particle. Takes optional
      * parameters to define particles.
      * Will take in speed, color, direction (as a
-     * vector), size (as {x, y}), point (as {x, y}),
-     * and mass. */
-    const createParticle = function(color, direction, size, point, mass) {
+     * vector), size (as {x, y}), and point (as {x, y}). */
+    const createParticle = function(color, direction, size, point) {
+        /* Declare mass outside of object so
+         * I can use it inside of the object. */
+        const mass = (size.x > largeParticleThreshold || size.y > largeParticleThreshold) ? ((size.x + size.y) * 0.5) : getRandomArbitrary(0.8, 1.2);
         return {
             color: color,
             direction: direction,
             size: size,
             point: point,
-            mass: mass,
             age: 0,
             /* The star will "start" dying at a random
               * time between 2 and 5 seconds. */
-            death: getRandomArbitrary(12, 128) * 100, // Roghly in seconds
-            maxSize: getRandomArbitrary(40, 80)
+            death: getRandomArbitrary(2, 5) * 100, // Roghly in seconds
+            maxSize: getRandomArbitrary(40, 80),
+            /* If we have a "big" particle,
+             * the mass should also be large. */
+            mass: mass,
+            drag: mass * getRandomArbitrary(0.00002, 0.00008),
+            maxSpeed: getRandomArbitrary(mass * 0.2, mass * 0.5)
         };
     };
-    /* Return a default size and mass
-     * for a particle. */
+    /* Return a default size for a particle. */
     const defaultParticleSize = function() {
         /* Randomize size with a small chance
          * for the particle to be a "super" particle. */
         const isSuperParticle = Math.random() > 0.03;
         let size = {
-            x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2),
-            y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2)
+            x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2),
+            y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2)
         };
-        // Mass is always around 1.0
-        let mass = getRandomArbitrary(0.80, 1.20);
         // Super small chance we have a protostar
         if (Math.random() > 0.95 && size.x > 10 && size.y > 10) {
             size.x *= getRandomArbitrary(5, 10);
             size.y *= getRandomArbitrary(5, 10);
-            /* Increase mass by the average Increase
-             * in size. */
-            mass *= ((size.x + size.y) * 0.5);
         }
-        /* Give back our object with size
-         * and mass. */
-        return {
-          size: size,
-          mass: mass
-        };
+        /* Give back our size. */
+        return size;
     };
     /* Return a color for the particle. */
     const defaultParticleColor = function() {
@@ -141,9 +138,8 @@ const STARSYSTEM = (function() {
         const color = defaultParticleColor();
         const vector = defaultParticleDirection();
         let point = defaultParticlePoint();
-        // returns both size and mass
-        const particleMeasurements = defaultParticleSize();
-        return createParticle(color, vector, particleMeasurements.size, point, particleMeasurements.mass);
+        const size = defaultParticleSize();
+        return createParticle(color, vector, size, point);
     };
     /* Will remove a particle from
      * the global array. */
@@ -175,12 +171,30 @@ const STARSYSTEM = (function() {
      * sort of continue it's direction. Speed degrades
      * over time due to degradeSpeed. */
     const positionParticle = function(particle) {
-        //if(isMouseInitialized()) {
-          //particle.direction.x = (particleSpawnPoint.x - particle.point.x) * 0.002;
-          //particle.direction.y = (particleSpawnPoint.y - particle.point.y) * 0.002;
-        //}
-        /* Move the particle if it's within
-        * the bounds of the canvas. */
+        if(isMouseInitialized()) {
+          // Now we can add axes easily!
+          const axes = ["x", "y"];
+          for(const axis in axes) {
+            const contextAxis = axes[axis];
+            if(particle.point[contextAxis] > particleSpawnPoint[contextAxis]) {
+              if(particle.direction[contextAxis] > -particle.maxSpeed) {
+                particle.direction[contextAxis] -= (particle.point[contextAxis] - particleSpawnPoint[contextAxis]) * particle.drag;
+              }
+              else {
+                particle.direction[contextAxis] = -particle.maxSpeed;
+              }
+            }
+            else if(particle.point[contextAxis] < particleSpawnPoint[contextAxis]) {
+              if(particle.direction[contextAxis] < particle.maxSpeed) {
+                particle.direction[contextAxis] += (particleSpawnPoint[contextAxis] - particle.point[contextAxis]) * particle.drag;
+              }
+              else {
+                particle.direction[contextAxis] = particle.maxSpeed;
+              }
+            }
+          }
+        }
+        /* Move the particle if it's outside the bounds of the canvas. */
         if ((particle.point.x + particle.size.x) + particle.direction.x < theCanvas.width && particle.point.x + particle.direction.x > 0) {
             particle.point.x += particle.direction.x;
         } else {
@@ -194,7 +208,7 @@ const STARSYSTEM = (function() {
             particle.direction.y *= -1;
         }
         // Degrade our particle speed.
-        degradeSpeed(particle);
+        //degradeSpeed(particle);
     };
     /* Will age a particle. The high level logic is that
      * if the particle is alive longer than the threshold set,
@@ -211,7 +225,6 @@ const STARSYSTEM = (function() {
             }
             // Enter death state
             if (particle.age > particle.death) {
-                particle.color = "#111";
                 if(particle.size.x < particle.maxSize) {
                   particle.size.x *= growRate;
                 }
