@@ -11,6 +11,7 @@ const STARSYSTEM = (function() {
     let particleList = [];
     const numberOfParticles = 1500;
     const growRate = 1.003;
+    
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
      * null to ensure particles won't spawn until user
@@ -23,7 +24,7 @@ const STARSYSTEM = (function() {
     // MODULE
     let starSystemModule = {};
 
-    // FUNCTIONS
+    // HELPER FUNCTIONS
 
     /* returns a random number between the specified values.
      * The returned value is no lower than (and may possibly equal)
@@ -31,33 +32,6 @@ const STARSYSTEM = (function() {
     const getRandomArbitrary = function(min, max) {
         return Math.random() * (max - min) + min;
     };
-
-    /* Will update particleSpawn, queries the event
-     * passed in for the user's mouse position then
-     * stores it for createDefaultParticle() to use. */
-    const updateParticleStartPoint = function(event) {
-        particleSpawnPoint.x = event.clientX;
-        particleSpawnPoint.y = event.clientY;
-    };
-
-    /* Will create a particle. Takes optional
-     * parameters to define particles.
-     * Will take in speed, color, direction (as a
-     * vector), size (as {x, y}), and point (as {x, y}). */
-    const createParticle = function(color, direction, size, point) {
-        return {
-            color: color,
-            direction: direction,
-            size: size,
-            point: point,
-            age: 0,
-            /* The star will "start" dying at a random
-              * time between 2 and 5 seconds. */
-            death: getRandomArbitrary(12, 128) * 100, // Roghly in seconds
-            maxSize: getRandomArbitrary(40, 80)
-        };
-    };
-
     /* Will retrieve an appropriate hex value. */
     const getRandomHexValue = function() {
         //return '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -72,20 +46,43 @@ const STARSYSTEM = (function() {
         ];
         return colors[Math.floor(Math.random()*colors.length)];
     };
+    /* Returns a truthy value if user has moved mouse, otherwise
+     * will return false. */
+    let isMouseInitialized = function() {
+      return (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) ? true : false;
+    }
+    /* Will update particleSpawn, queries the event
+     * passed in for the user's mouse position then
+     * stores it for createDefaultParticle() to use. */
+    const updateParticleStartPoint = function(event) {
+        particleSpawnPoint.x = event.clientX;
+        particleSpawnPoint.y = event.clientY;
+    };
 
-    /* Create a particle in the default position
-     * and put it into the array */
-    const createDefaultParticle = function() {
-        // Randomize color
-        const color = getRandomHexValue();
-        // Randomize a vector
-        const tempX = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
-        const tempY = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
-        // Build our vector to send to createParticle
-        const vector = {
-            x: tempX,
-            y: tempY
+    // PARTICLE FUNCTIONS
+
+    /* Will create a particle. Takes optional
+     * parameters to define particles.
+     * Will take in speed, color, direction (as a
+     * vector), size (as {x, y}), point (as {x, y}),
+     * and mass. */
+    const createParticle = function(color, direction, size, point, mass) {
+        return {
+            color: color,
+            direction: direction,
+            size: size,
+            point: point,
+            mass: mass,
+            age: 0,
+            /* The star will "start" dying at a random
+              * time between 2 and 5 seconds. */
+            death: getRandomArbitrary(12, 128) * 100, // Roghly in seconds
+            maxSize: getRandomArbitrary(40, 80)
         };
+    };
+    /* Return a default size and mass
+     * for a particle. */
+    const defaultParticleSize = function() {
         /* Randomize size with a small chance
          * for the particle to be a "super" particle. */
         const isSuperParticle = Math.random() > 0.03;
@@ -93,74 +90,61 @@ const STARSYSTEM = (function() {
             x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2),
             y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2)
         };
+        // Mass is always around 1.0
+        let mass = getRandomArbitrary(0.80, 1.20);
         // Super small chance we have a protostar
         if (Math.random() > 0.95 && size.x > 10 && size.y > 10) {
             size.x *= getRandomArbitrary(5, 10);
             size.y *= getRandomArbitrary(5, 10);
+            /* Increase mass by the average Increase
+             * in size. */
+            mass *= ((size.x + size.y) * 0.5);
         }
-        // Randomize point
-        const point = {
-            x: theCanvas.width * Math.random(),
-            y: theCanvas.height * Math.random()
+        /* Give back our object with size
+         * and mass. */
+        return {
+          size: size,
+          mass: mass
         };
-        //const point = {x: theCanvas.width * Math.random(), y: theCanvas.height * Math.random()};
-        return createParticle(color, vector, size, point);
     };
-
-    /* Will follow the mouse and create particles
-     * based off coordinates.
-     * NOTE: Duplicates lots of createDefaultParticle()
-     * could probably use a solution there...
-     * NOTE: No superstars!! */
-    const createMouseDrivenParticle = function() {
-        // Randomize color
-        const color = getRandomHexValue();
-        // Randomize a vector
+    /* Return a color for the particle. */
+    const defaultParticleColor = function() {
+        return getRandomHexValue();
+    };
+    /* Return a default vector for the
+     * particles. */
+    const defaultParticleDirection = function() {
         const tempX = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
         const tempY = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
-        // Build our vector to send to createParticle
-        const vector = {
+        return {
             x: tempX,
             y: tempY
         };
-        // Randomize size
-        let size = {
-            x: getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0),
-            y: getRandomArbitrary(3, 5) * getRandomArbitrary(0.5, 1.0)
+    };
+    /* Randomize point, spawn particles
+      * near the mouse if user has moved
+      * the mouse. */
+    const defaultParticlePoint = function() {
+        return {
+            x: isMouseInitialized() ? particleSpawnPoint.x : theCanvas.width * Math.random(),
+            y: isMouseInitialized() ? particleSpawnPoint.y : theCanvas.height * Math.random()
         };
-        // Randomize point
-        const point = {
-            x: particleSpawnPoint.x,
-            y: particleSpawnPoint.y
-        };
-        //const point = {x: theCanvas.width * Math.random(), y: theCanvas.height * Math.random()};
-        return createParticle(color, vector, size, point);
+        /* Middle of the screen */
+        /*return {
+          x: theCanvas.width * Math.random(),
+          y: theCanvas.height * Math.random()
+        };*/
     };
-
-    /* Will clear the screen. */
-    const clear = function() {
-        // Set the color of our particles
-        ctx.fillStyle = 'rgb(255,255,255)';
-        ctx.fillRect(0, 0, theCanvas.width, theCanvas.height);
+    /* Create a particle in the default position
+     * and put it into the array */
+    const createDefaultParticle = function() {
+        const color = defaultParticleColor();
+        const vector = defaultParticleDirection();
+        let point = defaultParticlePoint();
+        // returns both size and mass
+        const particleMeasurements = defaultParticleSize();
+        return createParticle(color, vector, particleMeasurements.size, point, particleMeasurements.mass);
     };
-    /* Let the browser decide which frames to "queue" up,
-     * and "queue" up a new particle as well. */
-    const queue = function() {
-        /* Add a particle if the user has moved
-         * their mouse */
-        if (particleList.length < numberOfParticles) {
-            // These two functions could probably be.
-            // the same function somehow. Arguments?
-            // but then that's createParticle...
-            // Rest Parameters?
-            if (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) {
-                particleList.push(createMouseDrivenParticle());
-            }
-            particleList.push(createDefaultParticle());
-        }
-        window.requestAnimationFrame(tick);
-    };
-
     /* Will remove a particle from
      * the global array. */
     const killParticle = function(particle) {
@@ -169,7 +153,6 @@ const STARSYSTEM = (function() {
         // So I can remove it, because it's dead!
         particleList.splice(particleIndex, 1);
     };
-
     /* Will degrade the speed of the direction for
      * a particle. */
     const degradeSpeed = function(particle) {
@@ -187,27 +170,32 @@ const STARSYSTEM = (function() {
             }
         }
     };
-
-    /* Positions a particle. */
-    const position = function(particle) {
+    /* Positions a particle, will follow the
+     * user's mouse if it can, otherwise will Just
+     * sort of continue it's direction. Speed degrades
+     * over time due to degradeSpeed. */
+    const positionParticle = function(particle) {
+        //if(isMouseInitialized()) {
+          //particle.direction.x = (particleSpawnPoint.x - particle.point.x) * 0.002;
+          //particle.direction.y = (particleSpawnPoint.y - particle.point.y) * 0.002;
+        //}
         /* Move the particle if it's within
-         * the bounds of the canvas. */
+        * the bounds of the canvas. */
         if ((particle.point.x + particle.size.x) + particle.direction.x < theCanvas.width && particle.point.x + particle.direction.x > 0) {
             particle.point.x += particle.direction.x;
         } else {
             // Kill the particle or bounce it back
-            particle.direction.x = particle.direction.x * -1;
+            particle.direction.x *= -1;
         }
         if ((particle.point.y + particle.size.y) + particle.direction.y < theCanvas.height && particle.point.y + particle.direction.y > 0) {
             particle.point.y += particle.direction.y;
         } else {
             // Kill the particle or bounce it back
-            particle.direction.y = particle.direction.y * -1;
+            particle.direction.y *= -1;
         }
         // Degrade our particle speed.
         degradeSpeed(particle);
     };
-
     /* Will age a particle. The high level logic is that
      * if the particle is alive longer than the threshold set,
      * it will first enter a death state, then after 1.5x it's
@@ -236,13 +224,30 @@ const STARSYSTEM = (function() {
             killParticle(particle);
         }
     };
+    // DRAW FUNCTIONS
 
+    /* Will clear the screen. */
+    const clear = function() {
+        // Set the color of our particles
+        ctx.fillStyle = 'rgb(255,255,255)';
+        ctx.fillRect(0, 0, theCanvas.width, theCanvas.height);
+    };
+    /* Let the browser decide which frames to "queue" up,
+     * and "queue" up a new particle as well. */
+    const queue = function() {
+        /* Add a particle if the user has moved
+         * their mouse */
+        if (particleList.length < numberOfParticles) {
+            particleList.push(createDefaultParticle());
+        }
+        window.requestAnimationFrame(tick);
+    };
     /* Draws each particle. */
     const draw = function() {
         for (var particle in particleList) {
             if (typeof particleList[particle] !== 'undefined')  {
                 // Position our particle
-                position(particleList[particle]);
+                positionParticle(particleList[particle]);
                 // Set the color of our particle
                 ctx.fillStyle = particleList[particle].color;
                 ctx.fillRect(
@@ -256,14 +261,12 @@ const STARSYSTEM = (function() {
             }
         }
     };
-
     /* The main handler of the animation engine. */
     const tick = function() {
         clear();
         draw();
         queue();
     };
-
     /* Initialization function */
     starSystemModule.init = function() {
         document.onmousemove = function(e) {
@@ -275,12 +278,16 @@ const STARSYSTEM = (function() {
         tick();
     };
 
+    /* Give back the module with
+     * the init function. */
     return starSystemModule;
-})();
+})(); // Immediately Invoked Function Expression for closure.
 
 /* As soon as the HTML elements are all
  * loaded, run the init function! */
 document.addEventListener("DOMContentLoaded", function() {
-    /* Initialize all of our particles */
+    /* Initialize all of our particles by calling
+     * on our IIFE which has been executed and
+     * self-contained above. */
     STARSYSTEM.init();
 });
