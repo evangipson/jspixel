@@ -10,6 +10,7 @@ const STARSYSTEM = (function() {
     // The global list of particles that are alive
     let particleList = [];
     const numberOfParticles = 1000;
+    const maximumParticleSize = 80;
     const growRate = 1.003;
     const largeParticleThreshold = 8;
     
@@ -79,7 +80,7 @@ const STARSYSTEM = (function() {
             /* The star will "start" dying at a random
               * time between 2 and 5 seconds. */
             death: getRandomArbitrary(2, 5) * 100, // Roghly in seconds
-            maxSize: getRandomArbitrary(40, 80),
+            maxSize: getRandomArbitrary(40, maximumParticleSize),
             /* If we have a "big" particle,
              * the mass should also be large. */
             mass: mass,
@@ -123,8 +124,8 @@ const STARSYSTEM = (function() {
       * the mouse. */
     const defaultParticlePoint = function() {
         return {
-            x: isMouseInitialized() ? particleSpawnPoint.x : theCanvas.width * Math.random(),
-            y: isMouseInitialized() ? particleSpawnPoint.y : theCanvas.height * Math.random()
+            x: isMouseInitialized() ? particleSpawnPoint.x : getRandomArbitrary(maximumParticleSize, theCanvas.width - maximumParticleSize),
+            y: isMouseInitialized() ? particleSpawnPoint.y : getRandomArbitrary(maximumParticleSize, theCanvas.height - maximumParticleSize)
         };
         /* Middle of the screen */
         /*return {
