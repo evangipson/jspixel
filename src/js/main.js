@@ -13,7 +13,7 @@ const STARSYSTEM = (function() {
     const maximumParticleSize = 60;
     const growRate = 1.003;
     const largeParticleThreshold = 8;
-    const spawnFrequency = 30;
+    const spawnFrequency = 20;
     let tickCount = 0;
     
     /* This will be updated in updateParticleStartPoint
@@ -221,7 +221,7 @@ const STARSYSTEM = (function() {
     /* Will "remember" a state for any passed
      * in particle. */
     const rememberPoint = function(particle) {
-      const maxTailLength = 6;
+      const maxTailLength = 10;
       const particlePointCopy = {
         x: particle.point.x,
         y: particle.point.y
@@ -306,12 +306,12 @@ const STARSYSTEM = (function() {
                  * color to indicate it's a trail... but let's use
                  * the size from above since we know it's the same. */
                 if(particleList[particle].history.length > 0) {
-                  for(let tailParticle in particleList[particle].history) {
+                  for(let historyIndex = 0; historyIndex < particleList[particle].history.length; historyIndex++) {
                     ctx.fillRect(
-                      particleList[particle].history[tailParticle].x,
-                      particleList[particle].history[tailParticle].y,
-                      particleList[particle].size.x,
-                      particleList[particle].size.y
+                      particleList[particle].history[historyIndex].x,
+                      particleList[particle].history[historyIndex].y,
+                      particleList[particle].size.x * (historyIndex / particleList[particle].history.length),
+                      particleList[particle].size.y * (historyIndex / particleList[particle].history.length)
                     );
                   }
                 }
@@ -319,7 +319,7 @@ const STARSYSTEM = (function() {
                 ageParticle(particleList[particle]);
                 /* And make sure to remember where we are
                   * for the tail calculations. */
-                if(tickCount % 4 === 0) {
+                if(tickCount % 2 === 0) {
                   rememberPoint(particleList[particle]);
                 }
             }
