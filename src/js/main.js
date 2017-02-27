@@ -9,10 +9,12 @@ const STARSYSTEM = (function() {
     theCanvas.height = window.innerHeight;
     // The global list of particles that are alive
     let particleList = [];
-    const numberOfParticles = 1000;
+    const numberOfParticles = 500;
     const maximumParticleSize = 60;
     const growRate = 1.003;
     const largeParticleThreshold = 8;
+    const spawnFrequency = 30;
+    let tickCount = 0;
     
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
@@ -85,7 +87,8 @@ const STARSYSTEM = (function() {
              * the mass should also be large. */
             mass: mass,
             drag: mass * getRandomArbitrary(0.00005, 0.0001),
-            maxSpeed: getRandomArbitrary(mass * 0.2, mass * 0.7)
+            maxSpeed: getRandomArbitrary(mass * 0.2, mass * 0.7),
+            history: []
         };
     };
     /* Return a default size for a particle. */
@@ -94,8 +97,8 @@ const STARSYSTEM = (function() {
          * for the particle to be a "super" particle. */
         const isSuperParticle = Math.random() > 0.03;
         let size = {
-            x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2),
-            y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(0.1, 2.2)
+            x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(1.1, 2.2),
+            y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(1.1, 2.2)
         };
         // Super small chance we have a protostar
         if (Math.random() > 0.95 && size.x > 10 && size.y > 10) {
@@ -215,6 +218,27 @@ const STARSYSTEM = (function() {
         // Degrade our particle speed.
         //degradeSpeed(particle);
     };
+    /* Will "remember" a state for any passed
+     * in particle. */
+    const rememberPoint = function(particle) {
+      const maxTailLength = 6;
+      const particlePointCopy = {
+        x: particle.point.x,
+        y: particle.point.y
+      };
+      /* If we have "room" in our particle tail,
+       * then push the particle into our history to
+       * draw later. If we don't have room, remove
+       * the last entry of history and add a new one
+       * on top again, to update the tail. */
+      if(particle.history.length < maxTailLength) {
+        particle.history.push(particlePointCopy);
+      }
+      else {
+        particle.history.splice(0, 1);
+        particle.history.push(particlePointCopy);
+      }
+    };
     /* Will age a particle. The high level logic is that
      * if the particle is alive longer than the threshold set,
      * it will first enter a death state, then after 1.5x it's
@@ -237,7 +261,8 @@ const STARSYSTEM = (function() {
                   particle.size.y *= growRate;
                 }
             }
-        } else {
+        }
+        else {
             // Kill the particle
             killParticle(particle);
         }
@@ -256,8 +281,11 @@ const STARSYSTEM = (function() {
         /* Add a particle if the user has moved
          * their mouse */
         if (particleList.length < numberOfParticles) {
-            particleList.push(createDefaultParticle());
+            if(tickCount == spawnFrequency) {
+              particleList.push(createDefaultParticle());
+            }
         }
+        tickCount = tickCount > spawnFrequency ? 0 : tickCount + 1;
         window.requestAnimationFrame(tick);
     };
     /* Draws each particle. */
@@ -274,8 +302,26 @@ const STARSYSTEM = (function() {
                   particleList[particle].size.x,
                   particleList[particle].size.y
                 );
+                /* Draw the particles history in a different
+                 * color to indicate it's a trail... but let's use
+                 * the size from above since we know it's the same. */
+                if(particleList[particle].history.length > 0) {
+                  for(let tailParticle in particleList[particle].history) {
+                    ctx.fillRect(
+                      particleList[particle].history[tailParticle].x,
+                      particleList[particle].history[tailParticle].y,
+                      particleList[particle].size.x,
+                      particleList[particle].size.y
+                    );
+                  }
+                }
                 // After we draw it, happy birthday!
                 ageParticle(particleList[particle]);
+                /* And make sure to remember where we are
+                  * for the tail calculations. */
+                if(tickCount % 4 === 0) {
+                  rememberPoint(particleList[particle]);
+                }
             }
         }
     };
