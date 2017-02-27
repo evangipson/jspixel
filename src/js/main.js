@@ -10,7 +10,7 @@ const STARSYSTEM = (function() {
     // The global list of particles that are alive
     let particleList = [];
     const numberOfParticles = 1000;
-    const maximumParticleSize = 80;
+    const maximumParticleSize = 60;
     const growRate = 1.003;
     const largeParticleThreshold = 8;
     
@@ -70,7 +70,7 @@ const STARSYSTEM = (function() {
     const createParticle = function(color, direction, size, point) {
         /* Declare mass outside of object so
          * I can use it inside of the object. */
-        const mass = (size.x > largeParticleThreshold || size.y > largeParticleThreshold) ? ((size.x + size.y) * 0.5) : getRandomArbitrary(0.8, 1.2);
+        const mass = (size.x > largeParticleThreshold || size.y > largeParticleThreshold) ? ((size.x + size.y) * 0.5) : getRandomArbitrary(2.4, 3.2);
         return {
             color: color,
             direction: direction,
@@ -79,13 +79,13 @@ const STARSYSTEM = (function() {
             age: 0,
             /* The star will "start" dying at a random
               * time between 2 and 5 seconds. */
-            death: getRandomArbitrary(2, 5) * 100, // Roghly in seconds
-            maxSize: getRandomArbitrary(40, maximumParticleSize),
+            death: getRandomArbitrary(12, 150) * 100, // Roghly in seconds
+            maxSize: getRandomArbitrary(maximumParticleSize * 0.7, maximumParticleSize),
             /* If we have a "big" particle,
              * the mass should also be large. */
             mass: mass,
-            drag: mass * getRandomArbitrary(0.00002, 0.00008),
-            maxSpeed: getRandomArbitrary(mass * 0.2, mass * 0.5)
+            drag: mass * getRandomArbitrary(0.00005, 0.0001),
+            maxSpeed: getRandomArbitrary(mass * 0.2, mass * 0.7)
         };
     };
     /* Return a default size for a particle. */
@@ -167,33 +167,37 @@ const STARSYSTEM = (function() {
             }
         }
     };
+    // Puts a particle in orbit.
+    const engageParticleOrbit = function(particle) {
+        // Now we can add axes easily!
+        const axes = ["x", "y"];
+        for(const axis in axes) {
+          const contextAxis = axes[axis];
+          if(particle.point[contextAxis] > particleSpawnPoint[contextAxis]) {
+            if(particle.direction[contextAxis] > -particle.maxSpeed) {
+              particle.direction[contextAxis] -= (particle.point[contextAxis] - particleSpawnPoint[contextAxis]) * particle.drag;
+            }
+            else {
+              particle.direction[contextAxis] = -particle.maxSpeed;
+            }
+          }
+          else if(particle.point[contextAxis] < particleSpawnPoint[contextAxis]) {
+            if(particle.direction[contextAxis] < particle.maxSpeed) {
+              particle.direction[contextAxis] += (particleSpawnPoint[contextAxis] - particle.point[contextAxis]) * particle.drag;
+            }
+            else {
+              particle.direction[contextAxis] = particle.maxSpeed;
+            }
+          }
+        }
+    };
     /* Positions a particle, will follow the
      * user's mouse if it can, otherwise will Just
      * sort of continue it's direction. Speed degrades
      * over time due to degradeSpeed. */
     const positionParticle = function(particle) {
         if(isMouseInitialized()) {
-          // Now we can add axes easily!
-          const axes = ["x", "y"];
-          for(const axis in axes) {
-            const contextAxis = axes[axis];
-            if(particle.point[contextAxis] > particleSpawnPoint[contextAxis]) {
-              if(particle.direction[contextAxis] > -particle.maxSpeed) {
-                particle.direction[contextAxis] -= (particle.point[contextAxis] - particleSpawnPoint[contextAxis]) * particle.drag;
-              }
-              else {
-                particle.direction[contextAxis] = -particle.maxSpeed;
-              }
-            }
-            else if(particle.point[contextAxis] < particleSpawnPoint[contextAxis]) {
-              if(particle.direction[contextAxis] < particle.maxSpeed) {
-                particle.direction[contextAxis] += (particleSpawnPoint[contextAxis] - particle.point[contextAxis]) * particle.drag;
-              }
-              else {
-                particle.direction[contextAxis] = particle.maxSpeed;
-              }
-            }
-          }
+          engageParticleOrbit(particle);
         }
         /* Move the particle if it's outside the bounds of the canvas. */
         if ((particle.point.x + particle.size.x) + particle.direction.x < theCanvas.width && particle.point.x + particle.direction.x > 0) {
