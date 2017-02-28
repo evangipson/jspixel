@@ -319,6 +319,10 @@ const STARSYSTEM = function() {
               particleList.push(createDefaultParticle());
             }
         }
+        /* Clean up extra particles we don't want */
+        else {
+          particleList.splice(particleList.length - (particleList.length - (userNumberOfParticles - 1), (particleList.length - (userNumberOfParticles - 1))));
+        }
         tickCount = tickCount > spawnFrequency ? 0 : tickCount + 1;
         window.requestAnimationFrame(tick);
     };
