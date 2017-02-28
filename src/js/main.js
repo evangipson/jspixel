@@ -1,21 +1,51 @@
 // Yay ECMAScript 6!
 "use strict;";
 
-const STARSYSTEM = (function() {
+let starSystem = {};
+
+// Store our program in a function for closure
+const STARSYSTEM = function() {
+    
     // VARIABLES
-    const theCanvas = document.querySelector('canvas');
+    
+    // Create and place canvas to get context
+    const theCanvas = document.createElement("canvas");
+    document.body.appendChild(theCanvas);
     const ctx = theCanvas.getContext('2d');
     theCanvas.width = window.innerWidth;
     theCanvas.height = window.innerHeight;
     // The global list of particles that are alive
     let particleList = [];
-    const numberOfParticles = 500;
-    const maximumParticleSize = 60;
     const growRate = 1.003;
-    const largeParticleThreshold = 8;
-    const spawnFrequency = 20;
     let tickCount = 0;
+    // In pixels
+    const maximumParticleSize = 60;
+    /* How big a particle needs to be before
+     * it's considered "large" for mass and
+     * size purposes. */
+    const largeParticleThreshold = 8;
+    // How often particles spawn. 10 = 1 second.
+    const spawnFrequency = 15;
     
+    // "USER CONTROL"/"FRONT END" VARIABLES
+    
+    // How many particles we can have on screen
+    const maxNumberOfParticles = 300;
+    let userNumberOfParticles = maxNumberOfParticles * 0.5;
+    // How long particle tails are
+    const maxTailLength = 40;
+    let userTailLength = maxTailLength * 0.5;
+
+    // Set up our defaults for use in createDefaultParticle.
+    const smallParticle = {
+      min: 3,
+      max: 5
+    };
+    const bigParticle = {
+      min: 6,
+      max: 9
+    };
+
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
      * null to ensure particles won't spawn until user
@@ -72,7 +102,7 @@ const STARSYSTEM = (function() {
     const createParticle = function(color, direction, size, point) {
         /* Declare mass outside of object so
          * I can use it inside of the object. */
-        const mass = (size.x > largeParticleThreshold || size.y > largeParticleThreshold) ? ((size.x + size.y) * 0.5) : getRandomArbitrary(2.4, 3.2);
+        const mass = (size.x > largeParticleThreshold || size.y > largeParticleThreshold) ? (((size.x + size.y) * 0.5) * getRandomArbitrary(0.4, 0.65)) : getRandomArbitrary(2.5, 3.5);
         return {
             color: color,
             direction: direction,
@@ -87,7 +117,7 @@ const STARSYSTEM = (function() {
              * the mass should also be large. */
             mass: mass,
             drag: mass * getRandomArbitrary(0.00005, 0.0001),
-            maxSpeed: getRandomArbitrary(mass * 0.2, mass * 0.7),
+            maxSpeed: getRandomArbitrary(mass * 0.7, mass * 0.9),
             history: []
         };
     };
@@ -97,8 +127,8 @@ const STARSYSTEM = (function() {
          * for the particle to be a "super" particle. */
         const isSuperParticle = Math.random() > 0.03;
         let size = {
-            x: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(1.1, 2.2),
-            y: isSuperParticle ? getRandomArbitrary(3, 5) * getRandomArbitrary(0.8, 1.0) : getRandomArbitrary(6, 9) * getRandomArbitrary(1.1, 2.2)
+            x: isSuperParticle ? getRandomArbitrary(smallParticle.min, smallParticle.max) * getRandomArbitrary(0.7, 1.0) : getRandomArbitrary(bigParticle.min, bigParticle.max) * getRandomArbitrary(1.1, 2.2),
+            y: isSuperParticle ? getRandomArbitrary(smallParticle.min, smallParticle.max) * getRandomArbitrary(0.7, 1.0) : getRandomArbitrary(bigParticle.min, bigParticle.max) * getRandomArbitrary(1.1, 2.2)
         };
         // Super small chance we have a protostar
         if (Math.random() > 0.95 && size.x > 10 && size.y > 10) {
@@ -221,7 +251,6 @@ const STARSYSTEM = (function() {
     /* Will "remember" a state for any passed
      * in particle. */
     const rememberPoint = function(particle) {
-      const maxTailLength = 10;
       const particlePointCopy = {
         x: particle.point.x,
         y: particle.point.y
@@ -231,11 +260,15 @@ const STARSYSTEM = (function() {
        * draw later. If we don't have room, remove
        * the last entry of history and add a new one
        * on top again, to update the tail. */
-      if(particle.history.length < maxTailLength) {
+      if(particle.history.length < userTailLength) {
         particle.history.push(particlePointCopy);
       }
-      else {
-        particle.history.splice(0, 1);
+      else if(particle.history.length >= userTailLength) {
+        /* If we are over the user set limit, remove until
+         * we match that user set limit! */
+        while(particle.history.length > userTailLength) {
+          particle.history.splice(0, 1);
+        }
         particle.history.push(particlePointCopy);
       }
     };
@@ -267,6 +300,7 @@ const STARSYSTEM = (function() {
             killParticle(particle);
         }
     };
+
     // DRAW FUNCTIONS
 
     /* Will clear the screen. */
@@ -280,7 +314,7 @@ const STARSYSTEM = (function() {
     const queue = function() {
         /* Add a particle if the user has moved
          * their mouse */
-        if (particleList.length < numberOfParticles) {
+        if (particleList.length < userNumberOfParticles) {
             if(tickCount == spawnFrequency) {
               particleList.push(createDefaultParticle());
             }
@@ -319,9 +353,9 @@ const STARSYSTEM = (function() {
                 ageParticle(particleList[particle]);
                 /* And make sure to remember where we are
                   * for the tail calculations. */
-                if(tickCount % 2 === 0) {
+                //if(tickCount % 2 === 0) {
                   rememberPoint(particleList[particle]);
-                }
+                //}
             }
         }
     };
@@ -331,13 +365,27 @@ const STARSYSTEM = (function() {
         draw();
         queue();
     };
+
+    // PUBLIC FUNCTIONS
+    starSystemModule.updateParticleTail = function(value) {
+      userTailLength = value < maxTailLength ? value : maxTailLength;
+    };
+
+    starSystemModule.getParticleTailLength = function() {
+      return userTailLength;
+    };
+    starSystemModule.updateParticleLimit = function(value) {
+      userNumberOfParticles = value < maxNumberOfParticles ? value : maxNumberOfParticles;
+    };
+    starSystemModule.getParticleLimit = function() {
+      return userNumberOfParticles;
+    };
+
     /* Initialization function */
     starSystemModule.init = function() {
-        document.onmousemove = function(e) {
-            updateParticleStartPoint(e);
+        document.onmousemove = function(event) {
+            updateParticleStartPoint(event);
         };
-        // Set the blending operation.
-        theCanvas.globalCompositeOperation = "multiply";
         // After we initialize, call the first tick.
         tick();
     };
@@ -345,13 +393,15 @@ const STARSYSTEM = (function() {
     /* Give back the module with
      * the init function. */
     return starSystemModule;
-})(); // Immediately Invoked Function Expression for closure.
+};
 
 /* As soon as the HTML elements are all
  * loaded, run the init function! */
 document.addEventListener("DOMContentLoaded", function() {
+    // Initialize our closure after DOMContent loads.
+    starSystem = STARSYSTEM();
     /* Initialize all of our particles by calling
      * on our IIFE which has been executed and
      * self-contained above. */
-    STARSYSTEM.init();
+    starSystem.init();
 });

@@ -1,6 +1,31 @@
+/* HTML reset */
 html, body, canvas {
   padding: 0;
   margin: 0;
+  color: #000000;
+}
+/* Typography reset */
+h1, h2, h3, h4, h5, h6, p, ul, ol, span {
+  margin: 0;
+  padding: 0;
+}
+/* Form styles */
+label, input {
+  display: block;
+}
+/* Typography styles */
+h2 {
+  margin: 0 0 0.5rem 0;
+}
+/* Custom styles */
+section.controls {
+  border-top: .4rem #eee solid;
+  border-bottom: .4rem #eee solid;
+  border-right: .4rem #ddd solid;
+  padding: 1rem 0.5rem;
+  background: #ffffff;
+  position: fixed;
+  top: 12rem;
 }
 canvas {
   width: 100vw;

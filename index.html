@@ -23,9 +23,16 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" media="none" onload="if(media!='all')media='all'" /> -->
         <!-- Google fonts look soOoOOO awesome
         <link href="https://fonts.googleapis.com/css?family=Cormorant+Infant:400,700|Cormorant+Unicase:300,700" rel="stylesheet"> -->
+        <!-- Loading this here because controls need it below -->
+        <script src="./src/js/main.js"></script>
     </head>
     <body>
-        <canvas></canvas>
-        <script src="./src/js/main.js"></script>
+        <section class="controls">
+            <h2>controls</h2>
+            <label for="tailControl">tail length</label>
+            <input onchange="starSystem.updateParticleTail(this.value)" type="range" name="tailControl" min="0" max="starSystem.getParticleTailLength()" />
+            <label for="particleLimit">particle limit</label>
+            <input onchange="starSystem.updateParticleLimit(this.value)" type="range" name="particleLimit" min="0" max="starSystem.getParticleLimit()" />
+        </section>
     </body>
 </html>
