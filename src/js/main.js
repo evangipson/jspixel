@@ -388,10 +388,10 @@ const STARSYSTEM = function() {
       /* Hide the mouse mass control if
        * we don't want to follow the mouse. */
       if(!userMouseFollow) {
-        $(".mousemass").hide("fade");
+        $(".mouse-mass").hide("fade");
       }
       else {
-        $(".mousemass").show("fade");
+        $(".mouse-mass").show("fade");
       }
     };
     starSystemModule.updateMouseMass = function(value) {

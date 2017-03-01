@@ -35,13 +35,13 @@
                 <span class="card-title">Options</span>
                 <span class="close-button" onclick="toggleEditingPanel()"><i class="material-icons">close</i></span>
                 <div style="clear: both;"></div>
-                <p style="margin-bottom: 1rem;">
+                <p class="follow-mouse" style="margin-bottom: 1rem;">
                     <input type="checkbox" id="followMouse" />
                     <label onclick="starSystem.toggleMouseFollow()" for="followMouse">Follow Mouse</label>
                 </p>
-                <p class="mousemass range-field">
+                <p class="mouse-mass range-field">
                     <label for="mouseMass">Mouse Mass</label>
-                    <input onchange="starSystem.updateMouseMass(this.value)" type="range" name="particleLimit" step="0.01" min="0.25" max="3.0" />
+                    <input onchange="starSystem.updateMouseMass(this.value)" type="range" name="particleLimit" step="0.01" min="0.25" max="5.0" />
                 </p>
                 <p class="range-field">
                     <label for="tailControl">Tail Length</label>

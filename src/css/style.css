@@ -20,7 +20,13 @@ label {
  * by default, we won't need it
  * unless the user wants to have
  * the particles follow the mouse. */
-.mousemass {
+.mouse-mass {
+  display: none;
+}
+/* Hide follow mouse control by
+ * default since mobile users don't
+ * have a mouse to follow. */
+.follow-mouse {
   display: none;
 }
 /* Typography styles */
@@ -81,5 +87,8 @@ canvas {
   .card.controls {
     font-size: 1rem;
     width: auto;
+  }
+  .follow-mouse {
+    display: block;
   }
 }
