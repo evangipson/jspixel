@@ -17,6 +17,7 @@ If you want a local copy of jspixel, just fork the repository, and set this up i
 * JavaScript
   * ECMAScript 6
 * CSS
+  * [Materialize Framework](http://materializecss.com/)
 * HTML
 * [Visual Studio Code](https://code.visualstudio.com/)
 * Google Chrome
