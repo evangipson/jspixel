@@ -35,6 +35,8 @@ const STARSYSTEM = function() {
     // How long particle tails are
     const maxTailLength = 40;
     let userTailLength = maxTailLength * 0.5;
+    // Do you want the particles to follow the mouse?
+    let userMouseFollow = true;
 
     // Set up our defaults for use in createDefaultParticle.
     const smallParticle = {
@@ -80,10 +82,11 @@ const STARSYSTEM = function() {
         ];
         return colors[Math.floor(Math.random()*colors.length)];
     };
-    /* Returns a truthy value if user has moved mouse, otherwise
+    /* Returns a truthy value if user has moved mouse, or if
+     * user prefers particles not to follow the mouse, otherwise
      * will return false. */
     let isMouseInitialized = function() {
-      return (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) ? true : false;
+      return (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) && userMouseFollow === true ? true : false;
     }
     /* Will update particleSpawn, queries the event
      * passed in for the user's mouse position then
@@ -377,7 +380,9 @@ const STARSYSTEM = function() {
     starSystemModule.updateParticleLimit = function(value) {
       userNumberOfParticles = value < maxNumberOfParticles ? value : maxNumberOfParticles;
     };
-
+    starSystemModule.toggleMouseFollow = function() {
+      userMouseFollow = userMouseFollow === true ? false : true;
+    };
     /* Initialization function */
     starSystemModule.init = function() {
         document.onmousemove = function(event) {

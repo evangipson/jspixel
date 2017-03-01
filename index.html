@@ -32,19 +32,21 @@
         <span class="z-depth-3 edit-panel-button" id="editPanelButton" onclick="toggleEditingPanel()"><i class="medium material-icons">mode_edit</i></span>
         <div id="editPanel" class="card horizontal controls">
             <div class="card-content">
-                <span class="card-title">Adjust</span>
+                <span class="card-title">Options</span>
                 <span class="close-button" onclick="toggleEditingPanel()"><i class="material-icons">close</i></span>
-                <div style="clear: both; position: relative; margin-top: 1rem;"></div>
-                <form>
-                    <p class="range-field">
-                        <label for="tailControl">Tail Length</label>
-                        <input onchange="starSystem.updateParticleTail(this.value)" type="range" name="tailControl" step="1" min="0" max="40" />
-                    </p>
-                    <p class="range-field">
-                        <label for="particleLimit">Particle Limit</label>
-                        <input onchange="starSystem.updateParticleLimit(this.value)" type="range" name="particleLimit" step="5" min="0" max="300" />
-                    </p>
-                </form>
+                <div style="clear: both;"></div>
+                <p style="margin-bottom: 1rem;">
+                    <input type="checkbox" class="filled-in" id="filled-in-box" checked="checked" />
+                    <label onclick="starSystem.toggleMouseFollow()" for="filled-in-box">Follow Mouse</label>
+                </p>
+                <p class="range-field">
+                    <label for="tailControl">Tail Length</label>
+                    <input onchange="starSystem.updateParticleTail(this.value)" type="range" name="tailControl" step="1" min="0" max="40" />
+                </p>
+                <p class="range-field">
+                    <label for="particleLimit">Particle Limit</label>
+                    <input onchange="starSystem.updateParticleLimit(this.value)" type="range" name="particleLimit" step="5" min="0" max="300" />
+                </p>
             </div>
         </div>
         <!--Import jQuery before materialize.js-->
