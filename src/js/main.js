@@ -392,6 +392,16 @@ const STARSYSTEM = function() {
     return starSystemModule;
 };
 
+/* Will "set up" the jQuery and
+ * javascript responsible for the
+ * editing panel. */
+function toggleEditingPanel() {
+  let button = $("#editPanelButton");
+  const panel = $("#editPanel");
+  button.toggle("slide");
+  panel.toggle("slide");
+}
+
 /* As soon as the HTML elements are all
  * loaded, run the init function! */
 document.addEventListener("DOMContentLoaded", function() {

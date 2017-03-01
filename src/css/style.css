@@ -18,6 +18,10 @@ h2 {
   margin: 0 0 0.5rem 0;
 }
 /* Custom styles */
+.card.controls, .edit-panel-button {
+  position: absolute;
+  bottom: 2rem;
+}
 .card.controls {
   position: absolute;
   display: inline-block;
@@ -26,4 +30,23 @@ h2 {
 canvas {
   width: 100vw;
   height: 100vh;
+}
+#editPanel {
+  display: none;
+}
+.edit-panel-button {
+  background: #fff;
+  left: 1rem;
+  padding: 0.5rem;
+  border: 1px #eee solid;
+  border-radius: 50%;
+  transition: box-shadow .25s ease,
+              padding .25s ease,
+              border .25s ease;
+}
+.edit-panel-button:hover {
+  box-shadow: none;
+  cursor: pointer;
+  border: 2px #ccc solid;
+  padding: 0.65rem;
 }
