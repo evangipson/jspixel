@@ -374,15 +374,8 @@ const STARSYSTEM = function() {
     starSystemModule.updateParticleTail = function(value) {
       userTailLength = value < maxTailLength ? value : maxTailLength;
     };
-
-    starSystemModule.getParticleTailLength = function() {
-      return userTailLength;
-    };
     starSystemModule.updateParticleLimit = function(value) {
       userNumberOfParticles = value < maxNumberOfParticles ? value : maxNumberOfParticles;
-    };
-    starSystemModule.getParticleLimit = function() {
-      return userNumberOfParticles;
     };
 
     /* Initialization function */

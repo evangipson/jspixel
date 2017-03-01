@@ -18,14 +18,10 @@ h2 {
   margin: 0 0 0.5rem 0;
 }
 /* Custom styles */
-section.controls {
-  border-top: .4rem #eee solid;
-  border-bottom: .4rem #eee solid;
-  border-right: .4rem #ddd solid;
-  padding: 1rem 0.5rem;
-  background: #ffffff;
-  position: fixed;
-  top: 12rem;
+.card.controls {
+  position: absolute;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.7);
 }
 canvas {
   width: 100vw;
