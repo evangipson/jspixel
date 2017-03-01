@@ -16,6 +16,13 @@ label, input {
 label {
   font-size: 2rem;
 }
+/* Hide mouse mass control
+ * by default, we won't need it
+ * unless the user wants to have
+ * the particles follow the mouse. */
+.mousemass {
+  display: none;
+}
 /* Typography styles */
 h2 {
   margin: 0 0 0.5rem 0;

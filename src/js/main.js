@@ -36,7 +36,10 @@ const STARSYSTEM = function() {
     const maxTailLength = 40;
     let userTailLength = maxTailLength * 0.5;
     // Do you want the particles to follow the mouse?
-    let userMouseFollow = true;
+    let userMouseFollow = false;
+    /* How "tight" do we want the orbit?
+     * Best range is 0.5 - 1.0. */
+    let userParticleSpeedScalar = 1.0;
 
     // Set up our defaults for use in createDefaultParticle.
     const smallParticle = {
@@ -211,7 +214,7 @@ const STARSYSTEM = function() {
           const contextAxis = axes[axis];
           if(particle.point[contextAxis] > particleSpawnPoint[contextAxis]) {
             if(particle.direction[contextAxis] > -particle.maxSpeed) {
-              particle.direction[contextAxis] -= (particle.point[contextAxis] - particleSpawnPoint[contextAxis]) * particle.drag;
+              particle.direction[contextAxis] -= (particle.point[contextAxis] - particleSpawnPoint[contextAxis]) * (particle.drag * userParticleSpeedScalar);
             }
             else {
               particle.direction[contextAxis] = -particle.maxSpeed;
@@ -219,7 +222,7 @@ const STARSYSTEM = function() {
           }
           else if(particle.point[contextAxis] < particleSpawnPoint[contextAxis]) {
             if(particle.direction[contextAxis] < particle.maxSpeed) {
-              particle.direction[contextAxis] += (particleSpawnPoint[contextAxis] - particle.point[contextAxis]) * particle.drag;
+              particle.direction[contextAxis] += (particleSpawnPoint[contextAxis] - particle.point[contextAxis]) * (particle.drag * userParticleSpeedScalar);
             }
             else {
               particle.direction[contextAxis] = particle.maxSpeed;
@@ -382,6 +385,17 @@ const STARSYSTEM = function() {
     };
     starSystemModule.toggleMouseFollow = function() {
       userMouseFollow = userMouseFollow === true ? false : true;
+      /* Hide the mouse mass control if
+       * we don't want to follow the mouse. */
+      if(!userMouseFollow) {
+        $(".mousemass").hide("fade");
+      }
+      else {
+        $(".mousemass").show("fade");
+      }
+    };
+    starSystemModule.updateMouseMass = function(value) {
+      userParticleSpeedScalar = value;
     };
     /* Initialization function */
     starSystemModule.init = function() {

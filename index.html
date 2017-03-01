@@ -36,8 +36,12 @@
                 <span class="close-button" onclick="toggleEditingPanel()"><i class="material-icons">close</i></span>
                 <div style="clear: both;"></div>
                 <p style="margin-bottom: 1rem;">
-                    <input type="checkbox" class="filled-in" id="filled-in-box" checked="checked" />
-                    <label onclick="starSystem.toggleMouseFollow()" for="filled-in-box">Follow Mouse</label>
+                    <input type="checkbox" id="followMouse" />
+                    <label onclick="starSystem.toggleMouseFollow()" for="followMouse">Follow Mouse</label>
+                </p>
+                <p class="mousemass range-field">
+                    <label for="mouseMass">Mouse Mass</label>
+                    <input onchange="starSystem.updateMouseMass(this.value)" type="range" name="particleLimit" step="0.01" min="0.25" max="3.0" />
                 </p>
                 <p class="range-field">
                     <label for="tailControl">Tail Length</label>
