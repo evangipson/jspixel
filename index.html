@@ -29,19 +29,19 @@
         <script src="./src/js/main.js"></script>
     </head>
     <body>
-        <span class="z-depth-3 edit-panel-button" id="editPanelButton" onclick="toggleEditingPanel()"><i class="material-icons">mode_edit</i></span>
+        <span class="z-depth-3 edit-panel-button" id="editPanelButton" onclick="toggleEditingPanel()"><i class="medium material-icons">mode_edit</i></span>
         <div id="editPanel" class="card horizontal controls">
             <div class="card-content">
-                <span style="float:left;" class="card-title">adjust</span>
-                <span style="float:right;padding-top:0.3rem;cursor:pointer" onclick="toggleEditingPanel()"><i class="close material-icons">close</i></span>
-                <div style="clear: both"></div>
+                <span class="card-title">Adjust</span>
+                <span class="close-button" onclick="toggleEditingPanel()"><i class="material-icons">close</i></span>
+                <div style="clear: both; position: relative; margin-top: 1rem;"></div>
                 <form>
                     <p class="range-field">
-                        <label for="tailControl">tail length</label>
+                        <label for="tailControl">Tail Length</label>
                         <input onchange="starSystem.updateParticleTail(this.value)" type="range" name="tailControl" step="1" min="0" max="40" />
                     </p>
                     <p class="range-field">
-                        <label for="particleLimit">particle limit</label>
+                        <label for="particleLimit">Particle Limit</label>
                         <input onchange="starSystem.updateParticleLimit(this.value)" type="range" name="particleLimit" step="5" min="0" max="300" />
                     </p>
                 </form>

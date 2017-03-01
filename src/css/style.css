@@ -2,7 +2,7 @@
 html, body, canvas {
   padding: 0;
   margin: 0;
-  color: #000000;
+  color: #111;
 }
 /* Typography reset */
 h1, h2, h3, h4, h5, h6, p, ul, ol, span {
@@ -13,6 +13,9 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, span {
 label, input {
   display: block;
 }
+label {
+  font-size: 2rem;
+}
 /* Typography styles */
 h2 {
   margin: 0 0 0.5rem 0;
@@ -21,19 +24,30 @@ h2 {
 .card.controls, .edit-panel-button {
   position: absolute;
   bottom: 2rem;
+  background: #fff;
+}
+.edit-panel-button, .close-button {
+  border-radius: 50%;
 }
 .card.controls {
   position: absolute;
   display: inline-block;
-  background: rgba(255, 255, 255, 0.7);
   width: 80%;
-  font-size: 2rem;
 }
-@media only screen and (min-width: 768px) {
-  .card.controls {
-    font-size: 1rem;
-    width: auto;
-  }
+div.card .card-content .card-title {
+  float: left;
+  margin-bottom: 1.5rem;
+}
+.close-button {
+  float:right;
+  padding:0.3rem;
+  cursor:pointer;
+  transition: background .25s ease,
+              color .25s ease;
+}
+.close-button:hover {
+  background: #333;
+  color: #fff;
 }
 canvas {
   width: 100vw;
@@ -43,11 +57,9 @@ canvas {
   display: none;
 }
 .edit-panel-button {
-  background: #fff;
   left: 1rem;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 1px #eee solid;
-  border-radius: 50%;
   transition: box-shadow .25s ease,
               padding .25s ease,
               border .25s ease;
@@ -55,6 +67,12 @@ canvas {
 .edit-panel-button:hover {
   box-shadow: none;
   cursor: pointer;
-  border: 2px #ccc solid;
-  padding: 0.65rem;
+  padding: 1rem;
+}
+/* Desktop styles */
+@media only screen and (min-width: 768px) {
+  .card.controls {
+    font-size: 1rem;
+    width: auto;
+  }
 }
