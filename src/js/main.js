@@ -28,23 +28,25 @@ const STARSYSTEM = function() {
      * size purposes. */
     const largeParticleThreshold = 8;
     // How often particles spawn. 10 = 1 second.
-    const spawnFrequency = 15;
+    const spawnFrequency = 20;
     // Audio variables
     let audioCtx = null;
     
     // "USER CONTROL"/"FRONT END" VARIABLES
     
     // How many particles we can have on screen
-    const maxNumberOfParticles = 300;
+    const maxNumberOfParticles = 150;
     let userNumberOfParticles = maxNumberOfParticles * 0.5;
     // How long particle tails are
-    const maxTailLength = 40;
+    const maxTailLength = 30;
     let userTailLength = maxTailLength * 0.5;
     // Do you want the particles to follow the mouse?
     let userMouseFollow = false;
     /* How "tight" do we want the orbit?
      * Best range is 0.5 - 1.0. */
     let userParticleSpeedScalar = 1.0;
+    // Audio option controlling mute
+    let mute = false;
     // Set up our defaults for use in createDefaultParticle.
     const smallParticle = {
       min: 3,
@@ -170,8 +172,11 @@ const STARSYSTEM = function() {
      * cycling the wave options before
      * calling makeBoop(). */
     const makeRandomBoop = function() {
-      const theOscillator = newOscillator();
-      makeBoop(theOscillator);
+      // If we aren't muted, do the thing.
+      if(!mute) {
+        const theOscillator = newOscillator();
+        makeBoop(theOscillator);
+      }
     };
     /**
      * Creates the audio context and a default
@@ -359,7 +364,7 @@ const STARSYSTEM = function() {
         } else {
             // Bounce it back
             particle.direction.x *= -1;
-            // And make it boop!
+            // And make it boop, if we aren't muted.
             makeRandomBoop();
         }
         if ((particle.point.y + particle.size.y) + particle.direction.y < theCanvas.height && particle.point.y + particle.direction.y > 0) {
@@ -511,6 +516,9 @@ const STARSYSTEM = function() {
     starSystemModule.updateParticleLimit = function(value) {
       userNumberOfParticles = value < maxNumberOfParticles ? value : maxNumberOfParticles;
     };
+    starSystemModule.toggleMute = function() {
+      mute = mute === true ? false : true;
+    }
     starSystemModule.toggleMouseFollow = function() {
       userMouseFollow = userMouseFollow === true ? false : true;
       /* Hide the mouse mass control if

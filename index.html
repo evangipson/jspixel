@@ -43,6 +43,10 @@
                     <label for="mouseMass">Mouse Mass</label>
                     <input onchange="starSystem.updateMouseMass(this.value)" type="range" name="particleLimit" step="0.01" min="0.25" max="5.0" />
                 </p>
+                <p class="toggle-mute" style="margin-bottom: 1rem;">
+                    <input type="checkbox" id="toggleMute" />
+                    <label onclick="starSystem.toggleMute()" for="toggleMute">Mute</label>
+                </p>
                 <p class="range-field">
                     <label for="tailControl">Tail Length</label>
                     <input onchange="starSystem.updateParticleTail(this.value)" type="range" name="tailControl" step="1" min="0" max="40" />
