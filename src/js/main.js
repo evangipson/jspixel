@@ -156,8 +156,10 @@ const STARSYSTEM = function() {
       const frequencyValues = {
         /* Made up of arrays that
          * represent scales. */
-        // C# Minor up to 13th
-        cSharp: [277.18, 311.13, 329.63, 369.99, 415.30, 466.16, 523.25, 554.37, 622.25, 698.46]
+        // C# Minor up to 10th
+        cSharp: [277.18, 311.13, 329.63, 369.99, 415.30, 466.16, 523.25, 554.37, 622.25, 698.46],
+        // C# Minor No 3rd or 7th.
+        cSharp: [277.18, 311.13, 369.99, 415.30, 466.16, 554.37]
       };
       returnOscillator.type = getRandomElement(oscillatorTypes);
       // Hardcoding .cSharp here but there be will be more scales
