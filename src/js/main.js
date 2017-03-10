@@ -3,7 +3,10 @@
 
 let starSystem = {};
 
-// Store our program in a function for closure
+/**
+ * JSPIXEL Closure
+ * @return {object} starSystem
+ */
 const STARSYSTEM = function() {
     
     // VARIABLES
@@ -26,6 +29,8 @@ const STARSYSTEM = function() {
     const largeParticleThreshold = 8;
     // How often particles spawn. 10 = 1 second.
     const spawnFrequency = 15;
+    // Audio variables
+    let audioCtx = null;
     
     // "USER CONTROL"/"FRONT END" VARIABLES
     
@@ -40,7 +45,6 @@ const STARSYSTEM = function() {
     /* How "tight" do we want the orbit?
      * Best range is 0.5 - 1.0. */
     let userParticleSpeedScalar = 1.0;
-
     // Set up our defaults for use in createDefaultParticle.
     const smallParticle = {
       min: 3,
@@ -50,7 +54,6 @@ const STARSYSTEM = function() {
       min: 6,
       max: 9
     };
-
     /* This will be updated in updateParticleStartPoint
      * and used in createDefaultParticle. Initialized to
      * null to ensure particles won't spawn until user
@@ -61,17 +64,24 @@ const STARSYSTEM = function() {
     };
 
     // MODULE
+
     let starSystemModule = {};
 
     // HELPER FUNCTIONS
 
-    /* returns a random number between the specified values.
+    /**
+     * Returns a random number between the specified values.
      * The returned value is no lower than (and may possibly equal)
-     * min, and is less than (but not equal to) max. */
+     * min, and is less than (but not equal to) max.
+     * @param {Number} min
+     * @param {Number} max
+     * @return {Number} randomNumber */
     const getRandomArbitrary = function(min, max) {
         return Math.random() * (max - min) + min;
     };
-    /* Will retrieve an appropriate hex value. */
+    /**
+     * Will retrieve an appropriate hex value.
+     * @return {String} hexValue */
     const getRandomHexValue = function() {
         //return '#' + Math.floor(Math.random() * 16777215).toString(16);
         const colors = [
@@ -85,26 +95,111 @@ const STARSYSTEM = function() {
         ];
         return colors[Math.floor(Math.random()*colors.length)];
     };
-    /* Returns a truthy value if user has moved mouse, or if
+    /**
+     * Will pick out a value of the incoming array
+     * and return it.
+     * @param {Array} array
+     * @return {element} randomArrayElement */
+    const getRandomElement = function(incArray) {
+      if(incArray.length < 2) {
+        return 0;
+      }
+      return incArray[Math.floor(getRandomArbitrary(0, incArray.length-1))];
+    };
+    /**
+     * Returns a truthy value if user has moved mouse, or if
      * user prefers particles not to follow the mouse, otherwise
-     * will return false. */
+     * will return false.
+     * TODO: Test if this can be const.
+     * @return {Boolean} mouseInitialized */
     let isMouseInitialized = function() {
       return (particleSpawnPoint.x !== null && particleSpawnPoint.y !== null) && userMouseFollow === true ? true : false;
-    }
-    /* Will update particleSpawn, queries the event
+    };
+    /**
+     * Will update particleSpawn, queries the event
      * passed in for the user's mouse position then
-     * stores it for createDefaultParticle() to use. */
+     * stores it for createDefaultParticle() to use.
+     * @param {Event} event */
     const updateParticleStartPoint = function(event) {
         particleSpawnPoint.x = event.clientX;
         particleSpawnPoint.y = event.clientY;
     };
 
+    // AUDIO FUNCTIONS
+
+    /**
+     * Will generate a boop with the passed in
+     * oscillator. */
+    const makeBoop = function(oscillator) {
+      if(oscillator != null) {
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.25);
+      }
+    };
+    /**
+     * Will randomize a oscillator
+     * frequency value and type, then
+     * return that oscillator.
+     * @return {Oscillator} oscillator */
+    const newOscillator = function() {
+      let returnOscillator = audioCtx.createOscillator();
+      let oscillatorTypes = [
+        "sine",
+        //"square",
+        //"sawtooth",
+        //"triangle"
+      ];
+      /* TODO: Make these scales depend
+       * on user choice. */
+      const frequencyValues = {
+        /* Made up of arrays that
+         * represent scales. */
+        // C# Minor up to 13th
+        cSharp: [277.18, 311.13, 329.63, 369.99, 415.30, 466.16, 523.25, 554.37, 622.25, 698.46]
+      };
+      returnOscillator.type = getRandomElement(oscillatorTypes);
+      // Hardcoding .cSharp here but there be will be more scales
+      console.log(getRandomElement(oscillatorTypes));
+      returnOscillator.frequency.value = getRandomElement(frequencyValues.cSharp);
+      // Connect up the oscillator
+      returnOscillator.connect(audioCtx.destination);
+      return returnOscillator;
+    };
+    /**
+     * Will generate a random boop by
+     * cycling the wave options before
+     * calling makeBoop(). */
+    const makeRandomBoop = function() {
+      const theOscillator = newOscillator();
+      makeBoop(theOscillator);
+    };
+    /**
+     * Creates the audio context and a default
+     * oscillator, then returns it. 
+     * @return {object} audioContext */
+    const createAudioContext = function() {
+      /* Webkit/blink browsers need prefix, Safari won't work without window.
+       * Define audio context. */
+      const localCtx = new (window.AudioContext || window.webkitAudioContext)();
+      // Return the new audio context.
+      return localCtx;
+    };
+
     // PARTICLE FUNCTIONS
 
-    /* Will create a particle. Takes optional
+    /**
+     * Will create a particle. Takes optional
      * parameters to define particles.
      * Will take in speed, color, direction (as a
-     * vector), size (as {x, y}), and point (as {x, y}). */
+     * vector), size (as {x, y}), and point (as {x, y}).
+     * Will calculate mass, drag, maxSpeed, and also
+     * set up the history buffer array for particle
+     * tails.
+     * @param {String} color
+     * @param {object} direction
+     * @param {Number} size
+     * @param {object} point
+     * @return {object} particle */
     const createParticle = function(color, direction, size, point) {
         /* Declare mass outside of object so
          * I can use it inside of the object. */
@@ -127,7 +222,11 @@ const STARSYSTEM = function() {
             history: []
         };
     };
-    /* Return a default size for a particle. */
+    /**
+     * Return a default size for a particle,
+     * with a small chance of becoming a "super"
+     * particle.
+     * @return {object} */
     const defaultParticleSize = function() {
         /* Randomize size with a small chance
          * for the particle to be a "super" particle. */
@@ -144,12 +243,16 @@ const STARSYSTEM = function() {
         /* Give back our size. */
         return size;
     };
-    /* Return a color for the particle. */
+    /**
+     * Return a color for the particle.
+     * @return {String} hexValue */
     const defaultParticleColor = function() {
         return getRandomHexValue();
     };
-    /* Return a default vector for the
-     * particles. */
+    /**
+     * Return a default vector for the
+     * particles.
+     * @return {object} particleDirection */
     const defaultParticleDirection = function() {
         const tempX = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
         const tempY = getRandomArbitrary(-8.5, 8.5) * getRandomArbitrary(-0.4, 0.4);
@@ -158,9 +261,11 @@ const STARSYSTEM = function() {
             y: tempY
         };
     };
-    /* Randomize point, spawn particles
-      * near the mouse if user has moved
-      * the mouse. */
+    /**
+     * Randomize point, spawn particles
+     * near the mouse if user has moved
+     * the mouse.
+     * @return {object} particlePoint */
     const defaultParticlePoint = function() {
         return {
             x: isMouseInitialized() ? particleSpawnPoint.x : getRandomArbitrary(maximumParticleSize, theCanvas.width - maximumParticleSize),
@@ -172,8 +277,10 @@ const STARSYSTEM = function() {
           y: theCanvas.height * Math.random()
         };*/
     };
-    /* Create a particle in the default position
-     * and put it into the array */
+    /**
+     * Create a particle in the default position
+     * and put it into the array. 
+     * @return {object} particle */
     const createDefaultParticle = function() {
         const color = defaultParticleColor();
         const vector = defaultParticleDirection();
@@ -181,16 +288,20 @@ const STARSYSTEM = function() {
         const size = defaultParticleSize();
         return createParticle(color, vector, size, point);
     };
-    /* Will remove a particle from
-     * the global array. */
+    /**
+     * Will remove a particle from
+     * the global array.
+     * @param {object} particle */
     const killParticle = function(particle) {
         // Find the index of our particle
         const particleIndex = particleList.indexOf(particle);
         // So I can remove it, because it's dead!
         particleList.splice(particleIndex, 1);
     };
-    /* Will degrade the speed of the direction for
-     * a particle. */
+    /**
+     * Will degrade the speed of the direction for
+     * a particle.
+     * @param {object} particle */
     const degradeSpeed = function(particle) {
         /* Small chance to "slow down" and
          * zoom in. */
@@ -206,9 +317,11 @@ const STARSYSTEM = function() {
             }
         }
     };
-    // Puts a particle in orbit.
+    /**
+     * Puts a particle in orbit.
+     * @param {object} particle */
     const engageParticleOrbit = function(particle) {
-        // Now we can add axes easily!
+        // TODO: Initialize axes to particle.point.length and fill dynamically
         const axes = ["x", "y"];
         for(const axis in axes) {
           const contextAxis = axes[axis];
@@ -230,10 +343,12 @@ const STARSYSTEM = function() {
           }
         }
     };
-    /* Positions a particle, will follow the
+    /**
+     * Positions a particle, will follow the
      * user's mouse if it can, otherwise will Just
      * sort of continue it's direction. Speed degrades
-     * over time due to degradeSpeed. */
+     * over time due to degradeSpeed.
+     * @param {object} particle */
     const positionParticle = function(particle) {
         if(isMouseInitialized()) {
           engageParticleOrbit(particle);
@@ -242,20 +357,27 @@ const STARSYSTEM = function() {
         if ((particle.point.x + particle.size.x) + particle.direction.x < theCanvas.width && particle.point.x + particle.direction.x > 0) {
             particle.point.x += particle.direction.x;
         } else {
-            // Kill the particle or bounce it back
+            // Bounce it back
             particle.direction.x *= -1;
+            // And make it boop!
+            makeRandomBoop();
         }
         if ((particle.point.y + particle.size.y) + particle.direction.y < theCanvas.height && particle.point.y + particle.direction.y > 0) {
             particle.point.y += particle.direction.y;
         } else {
             // Kill the particle or bounce it back
             particle.direction.y *= -1;
+            // And make it boop!
+            makeRandomBoop();
         }
         // Degrade our particle speed.
         //degradeSpeed(particle);
     };
-    /* Will "remember" a state for any passed
-     * in particle. */
+    /**
+     * Will "remember" a state for any passed
+     * in particle by inserting it into the passed
+     * in particle's history array.
+     * @param {object} particle */
     const rememberPoint = function(particle) {
       const particlePointCopy = {
         x: particle.point.x,
@@ -278,10 +400,12 @@ const STARSYSTEM = function() {
         particle.history.push(particlePointCopy);
       }
     };
-    /* Will age a particle. The high level logic is that
+    /**
+     * Will age a particle. The high level logic is that
      * if the particle is alive longer than the threshold set,
      * it will first enter a death state, then after 1.5x it's
-     * threshold, will die. */
+     * threshold, will die.
+     * @param {object} particle */
     const ageParticle = function(particle) {
         /* And then go for 3 more seconds before
          * it expires */
@@ -309,13 +433,15 @@ const STARSYSTEM = function() {
 
     // DRAW FUNCTIONS
 
-    /* Will clear the screen. */
+    /**
+     * Will clear the screen. */
     const clear = function() {
         // Set the color of our particles
         ctx.fillStyle = 'rgb(255,255,255)';
         ctx.fillRect(0, 0, theCanvas.width, theCanvas.height);
     };
-    /* Let the browser decide which frames to "queue" up,
+    /**
+     * Let the browser decide which frames to "queue" up,
      * and "queue" up a new particle as well. */
     const queue = function() {
         /* Add a particle if the user has moved
@@ -332,7 +458,8 @@ const STARSYSTEM = function() {
         tickCount = tickCount > spawnFrequency ? 0 : tickCount + 1;
         window.requestAnimationFrame(tick);
     };
-    /* Draws each particle. */
+    /**
+     * Draws each particle. */
     const draw = function() {
         for (var particle in particleList) {
             if (typeof particleList[particle] !== 'undefined')  {
@@ -369,7 +496,8 @@ const STARSYSTEM = function() {
             }
         }
     };
-    /* The main handler of the animation engine. */
+    /**
+     * The main handler of the animation engine. */
     const tick = function() {
         clear();
         draw();
@@ -397,11 +525,13 @@ const STARSYSTEM = function() {
     starSystemModule.updateMouseMass = function(value) {
       userParticleSpeedScalar = value;
     };
-    /* Initialization function */
+    /**
+     * Initialization function */
     starSystemModule.init = function() {
         document.onmousemove = function(event) {
             updateParticleStartPoint(event);
         };
+        audioCtx = createAudioContext();
         // After we initialize, call the first tick.
         tick();
     };
